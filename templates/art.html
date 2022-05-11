@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div id="some_id">
+    {% autoescape false %}
+    {{text}}
+    {% endautoescape %}
+</div>
+<a class="btn btn-primary " href="/like">Мне нравится</a> <br>
+<style>
+    #some_id {
+         background-color: #E6E6FA;
+    }
+
+</style>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<p>&nbsp;</p>
+<h3 style="text-align: center; color: #3f7320;"><span style="border-bottom: 4px solid #c82828;">Главная страница :)</span></h3>
+<!-- Этот комментарий виден только в редакторе исходного кода -->
+<p><img class="imageLeft" src="static/img/ed.png" alt="Ed" /><strong>Эта страница будет главной страницей моего будущего блога, но так как я все еще его пишу, то на это потребуется некоторое время, так что ты надеюсь найдешь чем себя занять)<br /></strong><strong></strong></p>
+{% if current_user.is_authenticated == False %}
+<p>Чтобы оспользоваться всеми функциями сайта, необходимо<br />войти или зарегестрироваться:</p>
+<a class="btn btn-primary " href="/register">Зарегистрироваться</a> <br>
+<a class="btn btn-success" href="/login">Войти</a>
+{%endif%}
+{% if current_user.is_authenticated %}
+<a class="btn btn-primary " href="/create_article">Написать статью</a> <br>
+<a class="btn btn-primary " href="/articles">Читать статьи</a> <br>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div id="some_id">
+{% autoescape false %}
+    {{text}}
+{% endautoescape %}
+</div>
+
+<a class="btn btn-primary " href="/new_article"> Создать статью </a> <br>
+
+{% endblock %}

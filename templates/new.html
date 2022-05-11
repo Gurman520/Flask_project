@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<form action="" method="post">
+	{{ form.hidden_tag() }}
+    {{ form.csrf_token }}
+	<p>
+        {{ form.title.label }}<br>
+        {{ form.title(class="form-control") }}
+        {% for error in form.title.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+
+    <p>
+
+    </p>
+
+    <p>
+        {{ form.text.label }}<br>
+        {{ form.text(class="form-control", rows="50") }}
+        {% for error in form.text.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+	<p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+</form>
+
+{% endblock %}

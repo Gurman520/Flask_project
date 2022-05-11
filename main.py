@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect
 from data import db_session
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from data.tables import User, Tag, Article
@@ -15,6 +15,7 @@ app.config['SECRET_KEY'] = 'my_secret_key'
 api = Api(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
+imn = 5
 
 
 @login_manager.user_loader
@@ -33,6 +34,7 @@ def index():
 def prof():
     return f'''<H1>В разработке</H1>'''
 
+
 @app.route('/create_article')
 @login_required
 def create_article():
@@ -45,12 +47,18 @@ def create_article():
 @app.route('/new_article', methods=['GET', 'POST'])
 @login_required
 def new_article():
+    global imn
     form = ArticleForm()
     if form.validate_on_submit():
-        # Необходимо дописать создание файла и его сохранение, так же добавление записи в бд, /
-        # а также методы через  RESTful, чтобы все работало через него
-
-        print(form.text.data)
+        name = "./static/article/art_" + str(current_user.id) + "_" + str(imn) + ".md"
+        imn += 1
+        f = open(name, 'w')
+        f.write(form.text.data)
+        f.close()
+        post('http://localhost:5000/api/v2/list_art',
+             json={'title': form.title.data,
+                   'author': current_user.id,
+                   'text': name}).json()
         return redirect('/complete')
     return render_template('new.html', title='Новая статья', form=form)
 
@@ -67,7 +75,7 @@ def art(art_id):
     st = 'http://localhost:5000/api/v2/art/' + str(art_id)
     print(st)
     lis = get(st).json()
-    with open(lis['text'], encoding="utf-8") as fp:
+    with open(lis['text']) as fp:
         text = fp.read()
     html = markdown.markdown(text)
     return render_template('art.html', title=lis['title'], text=html)

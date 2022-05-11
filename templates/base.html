@@ -20,15 +20,20 @@
                 <a class="navbar-text" href="/articles"><strong>Читать статьи</strong></a>
             </li>
             <li class="nav-item">
-                <a class="navbar-text" href="/obout"><strong>Обо мне</strong></a>
+                <a class="navbar-text" href="/new_article"><strong>Написать статью</strong></a>
+            </li>
+            <li class="nav-item">
+                <a class="navbar-text" href="/about"><strong>Обо мне</strong></a>
+            </li>
+            <li class="nav-item">
+                <a class="navbar-text" href="/otvet"><strong>Оставить отзыв и пожелание</strong></a>
             </li>
         </div>
-        <!--        Дописать различные вкалдки в меню бар, так же продумать какие именно кнопки нужны-->
         {% if current_user.is_authenticated %}
         <div class="d-flex justify-content-end">
             <div class="d-flex align-items-center">
                 <li class="nav-item">
-                    <a class="navbar-brand" href="/profile">{{ current_user.name }}</a>
+                    <a class="navbar-brand" href="/profile/{{current_user.id}}">{{ current_user.name }}</a>
                 </li>
                 <li class="navbar-brand">
                     <a class="nav-link" href="/logout">

@@ -56,7 +56,6 @@ def main():
     add_tags("ather", '')
     add_tags("Single", '')
     add_article("First article", "./static/article/art_1.md", 1, [6])
-    add_article("Second article", "./static/article/art_2.md", 1, [1, 4])
 
 
 if __name__ == '__main__':

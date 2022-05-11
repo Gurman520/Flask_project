@@ -5,8 +5,8 @@ from data.tables import Article, User
 
 parser = reqparse.RequestParser()
 parser.add_argument('title', required=True)
-parser.add_argument('author', required=True)
-parser.add_argument('text', required=True, type=int)
+parser.add_argument('author', required=True, type=int)
+parser.add_argument('text', required=True)
 
 
 def abort_if_article_not_found(article_id):
@@ -29,3 +29,15 @@ class ArticleListResource(Resource):
         db_sess = db_session.create_session()
         art = db_sess.query(Article)
         return jsonify([{'id': item.id, 'title': item.title, 'author': item.author} for item in art])
+
+    def post(self):
+        args = parser.parse_args()
+        session = db_session.create_session()
+        art = Article(
+            title=args['title'],
+            author=args['author'],
+            text=args['text']
+        )
+        session.add(art)
+        session.commit()
+        return jsonify({'success': 'OK'})

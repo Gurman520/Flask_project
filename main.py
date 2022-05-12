@@ -2,11 +2,12 @@ from flask import Flask, render_template, redirect
 from data import db_session
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from data.tables import User, Tag, Article
-from forms.user_form import UserForm
+from forms.user_form import UserForm, UpdateUserForm
 from forms.login_form import LoginForm
 from forms.article_form import ArticleForm
 from flask_restful import Api
 import articles_resources
+import user_resources
 from requests import post, get, delete, put
 import markdown
 
@@ -97,9 +98,27 @@ def profile(use_id):
     lis = get('http://localhost:5000/api/v2/user/' + str(use_id)).json()
     log = lis['email'].split("@")
     name = lis['surname'] + " " + lis['name']
-    print(lis['sex'])
     return render_template('Profile_user.html', title=log[0], log_name=log[0], full_name=name, email=lis['email'],
                            country=lis['country'], sex=lis['sex'])
+
+
+@app.route('/edit_profile/<int:use_id>', methods=['GET', 'POST'])
+@login_required
+def edit_profile(use_id):
+    form = UpdateUserForm()
+    if form.validate_on_submit():
+        print(form.sex.data[0])
+        put('http://localhost:5000/api/v2/user/' + str(use_id),
+            json={'f_name': form.f_name.data, 's_name': form.s_name.data, 'sex': form.sex.data[0],
+                  'country': form.country.data, 'email': form.email.data}).json()
+        return redirect("/profile/" + str(use_id))
+    else:
+        print("error")
+    lis = get('http://localhost:5000/api/v2/user/' + str(use_id)).json()
+    log = lis['email'].split("@")
+    return render_template('edit_profile.html', title=log[0], log_name=log[0], f_name=lis['name'],
+                           s_name=lis['surname'], email=lis['email'],
+                           country=lis['country'], sex=lis['sex'], form=form)
 
 
 @app.route("/register", methods=['GET', 'POST'])
@@ -156,7 +175,7 @@ def main():
     db_session.global_init("db/my_project.db")
 
     api.add_resource(articles_resources.ArticleResource, '/api/v2/art/<int:art_id>')
-    api.add_resource(articles_resources.UserResource, '/api/v2/user/<int:user_id>')
+    api.add_resource(user_resources.UserResource, '/api/v2/user/<int:user_id>')
 
     api.add_resource(articles_resources.ArticleListResource, '/api/v2/list_art')
 

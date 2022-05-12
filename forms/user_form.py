@@ -13,3 +13,13 @@ class UserForm(FlaskForm):
     sex = SelectMultipleField("Пол", choices=['man', 'women'], validators=[DataRequired()])
 
     submit = SubmitField('Зарегестрироваться')
+
+
+class UpdateUserForm(FlaskForm):
+    email = StringField('Login/Email')
+    s_name = StringField('Фамилия')
+    f_name = StringField('Имя')
+    country = StringField("Страна")
+    sex = SelectMultipleField("Пол", choices=['man', 'women'])
+
+    submit = SubmitField('Сохранить')

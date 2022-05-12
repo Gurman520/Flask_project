@@ -16,15 +16,6 @@ def abort_if_article_not_found(article_id):
         abort(404, message=f"Article {article_id} not found")
 
 
-class UserResource(Resource):
-    def get(self, user_id):
-        # abort_if_article_not_found(art_id)
-        session = db_session.create_session()
-        use = session.query(User).get(user_id)
-        return jsonify(
-            {'name': use.name, 'surname': use.surname, 'email': use.email, 'country': use.country, 'sex': use.sex})
-
-
 class ArticleResource(Resource):
     def get(self, art_id):
         abort_if_article_not_found(art_id)

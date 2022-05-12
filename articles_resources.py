@@ -16,6 +16,15 @@ def abort_if_article_not_found(article_id):
         abort(404, message=f"Article {article_id} not found")
 
 
+class UserResource(Resource):
+    def get(self, user_id):
+        # abort_if_article_not_found(art_id)
+        session = db_session.create_session()
+        use = session.query(User).get(user_id)
+        return jsonify(
+            {'name': use.name, 'surname': use.surname, 'email': use.email, 'country': use.country, 'sex': use.sex})
+
+
 class ArticleResource(Resource):
     def get(self, art_id):
         abort_if_article_not_found(art_id)
@@ -28,7 +37,8 @@ class ArticleListResource(Resource):
     def get(self):
         db_sess = db_session.create_session()
         art = db_sess.query(Article)
-        return jsonify([{'id': item.id, 'title': item.title, 'author': item.author} for item in art])
+        return jsonify(
+            [{'id': item.id, 'title': item.title, 'author': item.author, 'status': item.status} for item in art])
 
     def post(self):
         args = parser.parse_args()
@@ -36,7 +46,8 @@ class ArticleListResource(Resource):
         art = Article(
             title=args['title'],
             author=args['author'],
-            text=args['text']
+            text=args['text'],
+            status=1
         )
         session.add(art)
         session.commit()

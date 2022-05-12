@@ -29,10 +29,13 @@ def index():
     return render_template("index.html", title="Home Page")
 
 
-@app.route('/profile')
+@app.route('/about')
 @login_required
-def prof():
-    return f'''<H1>В разработке</H1>'''
+def about():
+    with open("static/article/about.md", encoding="utf-8") as fp:
+        text = fp.read()
+    html = markdown.markdown(text)
+    return render_template("about.html", title="About Author", text=html)
 
 
 @app.route('/create_article')
@@ -91,7 +94,12 @@ def list_article():
 @app.route('/profile/<int:use_id>')
 @login_required
 def profile(use_id):
-    pass
+    lis = get('http://localhost:5000/api/v2/user/' + str(use_id)).json()
+    log = lis['email'].split("@")
+    name = lis['surname'] + " " + lis['name']
+    print(lis['sex'])
+    return render_template('Profile_user.html', title=log[0], log_name=log[0], full_name=name, email=lis['email'],
+                           country=lis['country'], sex=lis['sex'])
 
 
 @app.route("/register", methods=['GET', 'POST'])
@@ -112,7 +120,8 @@ def register():
             name=form.f_name.data,
             email=form.email.data,
             access_level=0,
-            country=form.country.data
+            country=form.country.data,
+            sex=form.sex.data[0]
         )
         user.set_password(form.password.data)
         db_sess.add(user)
@@ -147,6 +156,7 @@ def main():
     db_session.global_init("db/my_project.db")
 
     api.add_resource(articles_resources.ArticleResource, '/api/v2/art/<int:art_id>')
+    api.add_resource(articles_resources.UserResource, '/api/v2/user/<int:user_id>')
 
     api.add_resource(articles_resources.ArticleListResource, '/api/v2/list_art')
 

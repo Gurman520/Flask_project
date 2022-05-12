@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<div id="some_id">
+    {% autoescape false %}
+    {{text}}
+    {% endautoescape %}
+</div>
+{% endblock %}

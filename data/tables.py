@@ -31,6 +31,7 @@ class Article(SqlAlchemyBase):
     author = sqlalchemy.Column(sqlalchemy.Integer, ForeignKey('user.id'))
     text = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     create_data = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
+    status = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
     tags = orm.relation("Tag", secondary="Article_to_tags", backref="article")
     user = orm.relation('User')
 
@@ -46,6 +47,7 @@ class User(SqlAlchemyBase, UserMixin):
     country = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     email = sqlalchemy.Column(sqlalchemy.String,
                               index=True, unique=True, nullable=True)
+    sex = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     modified_date = sqlalchemy.Column(sqlalchemy.DateTime,
                                       default=datetime.datetime.now)

@@ -2,10 +2,12 @@
 
 {% block content %}
 {% for d in lis %}
+{% if d['status'] == 0 %}
 <pre class="bg-info">
     <a href="/art/{{d['id'] }}" class="text-warning">  <H2><strong>{{d['title']}} {{d['id']}}.</strong></H2> </a>
     <!--<H2><strong>{{d['title']}} {{d['id']}}.</strong></H2>-->
     <H3>Некое описание моей прекрасной статьи</H3>
 </pre>
+{% endif %}
 {% endfor %}
 {% endblock %}

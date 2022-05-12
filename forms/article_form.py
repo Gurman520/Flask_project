@@ -7,4 +7,4 @@ class ArticleForm(FlaskForm):
     title = StringField('Название статьи', validators=[DataRequired()])
     text = TextAreaField('Текст статьи', validators=[DataRequired()])
 
-    submit = SubmitField('Зарегестрироваться')
+    submit = SubmitField('Отправить статью')

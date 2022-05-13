@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 
 {% block content %}
-
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+<script  src="static/js/script.js"></script>
 <form action="" method="post">
 	{{ form.hidden_tag() }}
     {{ form.csrf_token }}
@@ -15,9 +16,23 @@
         {% endfor %}
     </p>
 
-    <p>
+    <div class="md_editor">
+  <a href="#insert_h1"         id="add_h1">         h1</a>
+  <a href="#insert_h2"         id="add_h2">         h2</a>
+  <a href="#insert_h3"         id="add_h3">         h3</a>
+  <a href="#insert_h4"         id="add_h4">         h4</a>
+  <a href="#insert_h5"         id="add_h5">         h5</a>
+  <a href="#insert_h6"         id="add_h6">         h6</a>
+  <a href="#insert_em"         id="add_em">         I</a>
+  <a href="#insert_strong"     id="add_strong">     B</a>
+  <a href="#insert_paragraf"   id="add_paragraph">  Para</a>
+  <a href="#insert_blockquote" id="add_blockquote"> BQt</a>
+  <a href="#insert_ul"         id="add_unord_list"> UL</a>
+  <a href="#insert_ol"         id="add_ord_list">   OL</a>
+  <a href="#insert_link"       id="add_link">       URL</a>
+  <br />
+</div>
 
-    </p>
 
     <p>
         {{ form.text.label }}<br>

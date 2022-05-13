@@ -39,6 +39,12 @@ def about():
     return render_template("about.html", title="About Author", text=html)
 
 
+@app.route('/admin_panel')
+@login_required
+def admin_panel():
+    pass
+
+
 @app.route('/create_article')
 @login_required
 def create_article():
@@ -107,7 +113,6 @@ def profile(use_id):
 def edit_profile(use_id):
     form = UpdateUserForm()
     if form.validate_on_submit():
-        print(form.sex.data[0])
         put('http://localhost:5000/api/v2/user/' + str(use_id),
             json={'f_name': form.f_name.data, 's_name': form.s_name.data, 'sex': form.sex.data[0],
                   'country': form.country.data, 'email': form.email.data}).json()
@@ -138,7 +143,7 @@ def register():
             surname=form.s_name.data,
             name=form.f_name.data,
             email=form.email.data,
-            access_level=0,
+            access_level=1,
             country=form.country.data,
             sex=form.sex.data[0]
         )

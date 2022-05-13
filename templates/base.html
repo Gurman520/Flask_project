@@ -25,9 +25,14 @@
             <li class="nav-item">
                 <a class="navbar-text" href="/about"><strong>Обо мне</strong></a>
             </li>
+            {% if current_user.id == 1 %}
             <li class="nav-item">
-                <a class="navbar-text" href="/otvet"><strong>Оставить отзыв и пожелание</strong></a>
+                <a class="navbar-text" href="/admin_panel"><strong>Админ панель</strong></a>
             </li>
+            {% endif %}
+<!--            <li class="nav-item">-->
+<!--                <a class="navbar-text" href="/otvet"><strong>Оставить отзыв и пожелание</strong></a>-->
+<!--            </li>-->
         </div>
         {% if current_user.is_authenticated %}
         <div class="d-flex justify-content-end">

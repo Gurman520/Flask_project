@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<H1 style="text-align: center;"><strong>Добро пожаловать, {{current_user.name}}</strong></H1>
+<H2><strong>Если хочешь администрировать пользователей, то нажми на кнопку ниже:</strong></H2>
+<a class="btn btn-primary " href="/admin_panel/users">Пользователи!</a>
+<br />
+{% for d in lis %}
+<pre class="bg-info">
+    <a href="/art/{{d['id'] }}" class="text-warning">  <H2><strong>{{d['title']}}</strong></H2> </a>
+    {% if d['status'] == 1 %}
+    <a class="btn btn-info " href="/up_article/{{d['id']}}">Опубликовать статью</a>
+    {% else %}
+    <a class="btn btn-info " href="/down_article/{{d['id']}}">Скрыть статью</a>
+    {% endif %}
+</pre>
+{% endfor %}
+{% endblock %}

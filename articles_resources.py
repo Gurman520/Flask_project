@@ -23,13 +23,36 @@ class ArticleResource(Resource):
         arts = session.query(Article).get(art_id)
         return jsonify({'title': arts.title, 'author': arts.author, 'text': arts.text})
 
+    def put(self, art_id):
+        abort_if_article_not_found(art_id)
+        session = db_session.create_session()
+        art = session.query(Article).get(art_id)
+        if 'title' in request.json:
+            art.title = request.json['title']
+        if 'text' in request.json:
+            art.text = request.json['text']
+        if 'status' in request.json:
+            art.status = request.json['status']
+        else:
+            art.status = 1
+        session.commit()
+        return jsonify({'success': 'OK'})
+
+    def delete(self, art_id):
+        abort_if_article_not_found(art_id)
+        session = db_session.create_session()
+        art = session.query(Article).get(art_id)
+        session.delete(art)
+        session.commit()
+        return jsonify({'success': 'OK'})
+
 
 class ArticleListResource(Resource):
     def get(self):
         db_sess = db_session.create_session()
         art = db_sess.query(Article)
         return jsonify(
-            [{'id': item.id, 'title': item.title, 'author': item.author, 'status': item.status} for item in art])
+            [{'id': item.id, 'title': item.title, 'author': item.author, 'text': item.text, 'status': item.status} for item in art])
 
     def post(self):
         args = parser.parse_args()

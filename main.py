@@ -4,7 +4,7 @@ from flask_login import LoginManager, login_user, login_required, logout_user, c
 from data.tables import User, Tag, Article
 from forms.user_form import UserForm, UpdateUserForm
 from forms.login_form import LoginForm
-from forms.article_form import ArticleForm
+from forms.article_form import ArticleForm, EditArticleForm
 from flask_restful import Api
 import articles_resources
 import user_resources
@@ -30,6 +30,10 @@ def index():
     return render_template("index.html", title="Home Page")
 
 
+def access_level():
+    return current_user.access_level == 0
+
+
 @app.route('/about')
 @login_required
 def about():
@@ -39,10 +43,58 @@ def about():
     return render_template("about.html", title="About Author", text=html)
 
 
+@app.route('/admin_panel/users')
+@login_required
+def admin_panel_users():
+    if access_level():
+        lis = get('http://localhost:5000/api/v2/list_user').json()
+        return render_template("all_profile.html", lis=lis)
+    else:
+        return f'''<h1> Отказано в доступе, так как у вас нет права на посещение данной страницы! 
+               \n Если вы считаете, что произошла ошибка, то свяжитесь с нами по почте.</h1>'''
+
+
 @app.route('/admin_panel')
 @login_required
 def admin_panel():
-    pass
+    if access_level():
+        lis = get('http://localhost:5000/api/v2/list_art').json()
+        return render_template("all_articles.html", lis=lis)
+    else:
+        return f'''<h1> Отказано в доступе, так как у вас нет права на посещение данной страницы! 
+        \n Если вы считаете, что произошла ошибка, то свяжитесь с нами по почте.</h1>'''
+
+
+@app.route('/up_article/<int:art_id>')
+@login_required
+def up_article(art_id):
+    put('http://localhost:5000/api/v2/art/' + str(art_id),
+        json={'status': 0}).json()
+    return redirect("/admin_panel")
+
+
+@app.route('/down_article/<int:art_id>')
+@login_required
+def down_article(art_id):
+    put('http://localhost:5000/api/v2/art/' + str(art_id),
+        json={'status': 1}).json()
+    return redirect("/admin_panel")
+
+
+@app.route('/up_root_user/<int:use_id>')
+@login_required
+def up_root_user(use_id):
+    put('http://localhost:5000/api/v2/user/' + str(use_id),
+        json={'level': 0}).json()
+    return redirect("/admin_panel")
+
+
+@app.route('/down_root_user/<int:use_id>')
+@login_required
+def down_root_user(use_id):
+    put('http://localhost:5000/api/v2/user/' + str(use_id),
+        json={'level': 1}).json()
+    return redirect("/admin_panel")
 
 
 @app.route('/create_article')
@@ -52,6 +104,32 @@ def create_article():
         text = fp.read()
     html = markdown.markdown(text)
     return render_template('new_art.html', title="Instruct for create art", text=html)
+
+
+@app.route('/delete_article/<int:art_id>')
+@login_required
+def delete_article(art_id):
+    delete('http://localhost:5000/api/v2/art/' + str(art_id)).json()
+    return redirect('/profile/' + str(current_user.id))
+
+
+@app.route('/edit_article/<int:art_id>', methods=['GET', 'POST'])
+@login_required
+def edit_article(art_id):
+    form = EditArticleForm()
+    article = get('http://localhost:5000/api/v2/art/' + str(art_id)).json()
+    if form.validate_on_submit():
+        print(form.text.data)
+        f = open(article['text'], 'w')
+        f.write(form.text.data)
+        f.close()
+        put('http://localhost:5000/api/v2/art/' + str(art_id),
+            json={'title': form.title.data,
+                  'text': article['text']}).json()
+        return redirect('/profile/' + str(current_user.id))
+    with open(article['text']) as fp:
+        text = fp.read()
+    return render_template("edit_article.html", articl=article, tex=text, form=form)
 
 
 @app.route('/new_article', methods=['GET', 'POST'])
@@ -101,11 +179,12 @@ def list_article():
 @app.route('/profile/<int:use_id>')
 @login_required
 def profile(use_id):
+    art_list = get('http://localhost:5000/api/v2/list_art').json()
     lis = get('http://localhost:5000/api/v2/user/' + str(use_id)).json()
     log = lis['email'].split("@")
     name = lis['surname'] + " " + lis['name']
     return render_template('Profile_user.html', title=log[0], log_name=log[0], full_name=name, email=lis['email'],
-                           country=lis['country'], sex=lis['sex'])
+                           country=lis['country'], sex=lis['sex'], art_list=art_list, id=lis['id'], status=lis['access'])
 
 
 @app.route('/edit_profile/<int:use_id>', methods=['GET', 'POST'])
@@ -183,6 +262,7 @@ def main():
     api.add_resource(user_resources.UserResource, '/api/v2/user/<int:user_id>')
 
     api.add_resource(articles_resources.ArticleListResource, '/api/v2/list_art')
+    api.add_resource(user_resources.ListUserResource, '/api/v2/list_user')
 
     app.run()
 

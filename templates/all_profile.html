@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% for d in lis %}
+{% if d['id'] != current_user.id %}
+<pre class="bg-info">
+    <a href="/profile/{{d['id'] }}" class="text-warning">  <H2><strong>{{d['surname']}} {{d['name']}}</strong></H2> </a>
+    {% if d['level'] == 1 %}
+    <a class="btn btn-info " href="/up_root_user/{{d['id']}}">Сделать пользователя Админом</a>
+    {% else %}
+    <a class="btn btn-info " href="/down_root_user/{{d['id']}}">Понизить ранг пользователя</a>
+    {% endif %}
+</pre>
+{% endif %}
+{% endfor %}
+{% endblock %}

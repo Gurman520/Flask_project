@@ -24,7 +24,8 @@ class UserResource(Resource):
         session = db_session.create_session()
         use = session.query(User).get(user_id)
         return jsonify(
-            {'name': use.name, 'surname': use.surname, 'email': use.email, 'country': use.country, 'sex': use.sex})
+            {'id': use.id, 'name': use.name, 'surname': use.surname, 'email': use.email, 'country': use.country,
+             'sex': use.sex, "access": use.access_level})
 
     def put(self, user_id):
         abort_if_user_not_found(user_id)
@@ -40,5 +41,16 @@ class UserResource(Resource):
             use.sex = request.json['sex']
         if 'email' in request.json:
             use.email = request.json['email']
+        if 'level' in request.json:
+            use.access_level = request.json['level']
         session.commit()
         return jsonify({'success': 'OK'})
+
+
+class ListUserResource(Resource):
+    def get(self):
+        session = db_session.create_session()
+        users = session.query(User)
+        return jsonify(
+            [{'id': use.id, 'name': use.name, 'surname': use.surname, 'email': use.email, 'country': use.country,
+              'sex': use.sex, 'level': use.access_level} for use in users])

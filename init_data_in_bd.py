@@ -55,7 +55,7 @@ def main():
     add_tags("HTML", '')
     add_tags("ML_learning", '')
     add_tags("bd", '')
-    add_tags("ather", '')
+    add_tags("Author", '')
     add_tags("Single", '')
     add_article("First article", "./static/article/art_1.md", 1, 0, [6])
 

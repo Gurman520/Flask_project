@@ -1,7 +1,7 @@
 from flask import jsonify, request
 from flask_restful import Resource, abort, reqparse
 from data import db_session
-from data.tables import Article, User
+from data.tables import Article, Tag
 
 parser = reqparse.RequestParser()
 parser.add_argument('title', required=True)
@@ -21,7 +21,10 @@ class ArticleResource(Resource):
         abort_if_article_not_found(art_id)
         session = db_session.create_session()
         arts = session.query(Article).get(art_id)
-        return jsonify({'title': arts.title, 'author': arts.author, 'text': arts.text})
+        tag = list()
+        for i in arts.tags:
+            tag.append(i.name)
+        return jsonify({'title': arts.title, 'author': arts.author, 'text': arts.text, 'tags': tag})
 
     def put(self, art_id):
         abort_if_article_not_found(art_id)
@@ -63,6 +66,9 @@ class ArticleListResource(Resource):
             text=args['text'],
             status=1
         )
+        for i in request.json['tegs']:
+            tag = session.query(Tag).filter(Tag.name == i).first()
+            art.tags.append(tag)
         session.add(art)
         session.commit()
         return jsonify({'success': 'OK'})

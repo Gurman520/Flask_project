@@ -6,11 +6,21 @@
     {{text}}
     {% endautoescape %}
 </div>
-<a class="btn btn-primary " href="/like">Мне нравится</a> <br>
+<!--<a class="btn btn-primary " href="/like">Мне нравится</a> <br>-->
 <style>
     #some_id {
          background-color: #E6E6FA;
     }
-
 </style>
+
+<div class="col-md-8">
+    <div class="card mb-3">
+        <div class="card-body">
+            {% for item in tag%}
+            <a class="btn btn-secondary">{{item}}</a> <br>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
 {% endblock %}

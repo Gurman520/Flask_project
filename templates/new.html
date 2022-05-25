@@ -16,6 +16,16 @@
         {% endfor %}
     </p>
 
+    <p>
+        {{ form.tegs.label }}<br>
+        {{ form.tegs(class="form-control") }}<br>
+        {% for error in form.tegs.errors %}
+    <p class="alert alert-danger" role="alert">
+        {{ error }}
+    </p>
+    {% endfor %}
+    </p>
+
     <div class="md_editor">
   <a href="#insert_h1"         id="add_h1">         h1</a>
   <a href="#insert_h2"         id="add_h2">         h2</a>

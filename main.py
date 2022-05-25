@@ -10,13 +10,14 @@ import articles_resources
 import user_resources
 from requests import post, get, delete, put
 import markdown
+from mail import MAIL
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'my_secret_key'
 api = Api(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
-imn = 5
+imn = 2
 
 
 @login_manager.user_loader
@@ -25,54 +26,64 @@ def load_user(user_id):
     return db_sess.query(User).get(user_id)
 
 
+# Функция вызова главной страницы сайта
 @app.route("/")
 def index():
     return render_template("index.html", title="Home Page")
 
 
+# Функция проверки уровня пользователя
 def access_level():
+    # Проверка, что пользователь администратор
     return current_user.access_level == 0
 
 
-@app.route('/about')
-@login_required
-def about():
-    with open("static/article/about.md", encoding="utf-8") as fp:
-        text = fp.read()
-    html = markdown.markdown(text)
-    return render_template("about.html", title="About Author", text=html)
+# @app.route('/about')
+# @login_required
+# def about():
+#     with open("static/article/about.md", encoding="utf-8") as fp:
+#         text = fp.read()
+#     html = markdown.markdown(text)
+#     return render_template("about.html", title="About Author", text=html)
 
 
-@app.route('/admin_panel/users')
-@login_required
-def admin_panel_users():
-    if access_level():
-        lis = get('http://localhost:5000/api/v2/list_user').json()
-        return render_template("all_profile.html", lis=lis)
-    else:
-        return f'''<h1> Отказано в доступе, так как у вас нет права на посещение данной страницы! 
-               \n Если вы считаете, что произошла ошибка, то свяжитесь с нами по почте.</h1>'''
-
-
+# Функция вызова страницы админ панели
 @app.route('/admin_panel')
 @login_required
 def admin_panel():
     if access_level():
-        lis = get('http://localhost:5000/api/v2/list_art').json()
-        return render_template("all_articles.html", lis=lis)
+        lis = get('http://localhost:5000/api/v2/list_art').json()  # получаем список статей
+        return render_template("all_articles.html", title='Admin article', lis=lis)
     else:
         return f'''<h1> Отказано в доступе, так как у вас нет права на посещение данной страницы! 
         \n Если вы считаете, что произошла ошибка, то свяжитесь с нами по почте.</h1>'''
 
 
+# Админ панель пользователей
+@app.route('/admin_panel/users')
+@login_required
+def admin_panel_users():
+    if access_level():
+        lis = get('http://localhost:5000/api/v2/list_user').json()  # получаем список пользователей
+        return render_template("all_profile.html", title='Admin Users', lis=lis)
+    else:
+        return f'''<h1> Отказано в доступе, так как у вас нет права на посещение данной страницы! 
+               \n Если вы считаете, что произошла ошибка, то свяжитесь с нами по почте.</h1>'''
+
+
+# Опубликовать статью
 @app.route('/up_article/<int:art_id>')
 @login_required
 def up_article(art_id):
     put('http://localhost:5000/api/v2/art/' + str(art_id),
         json={'status': 0}).json()
+    m = MAIL()
+    m.open_article()
+    print(1)
     return redirect("/admin_panel")
 
 
+# Скрыть статью с сайта
 @app.route('/down_article/<int:art_id>')
 @login_required
 def down_article(art_id):
@@ -81,22 +92,25 @@ def down_article(art_id):
     return redirect("/admin_panel")
 
 
+# Повысить пользователя до админа
 @app.route('/up_root_user/<int:use_id>')
 @login_required
 def up_root_user(use_id):
     put('http://localhost:5000/api/v2/user/' + str(use_id),
         json={'level': 0}).json()
-    return redirect("/admin_panel")
+    return redirect("/admin_panel/users")
 
 
+# Понизить пользователя до обычного пользователя
 @app.route('/down_root_user/<int:use_id>')
 @login_required
 def down_root_user(use_id):
     put('http://localhost:5000/api/v2/user/' + str(use_id),
         json={'level': 1}).json()
-    return redirect("/admin_panel")
+    return redirect("/admin_panel/users")
 
 
+# Выводит статью о том, как писать статью
 @app.route('/create_article')
 @login_required
 def create_article():
@@ -106,6 +120,7 @@ def create_article():
     return render_template('new_art.html', title="Instruct for create art", text=html)
 
 
+# Удалить статью
 @app.route('/delete_article/<int:art_id>')
 @login_required
 def delete_article(art_id):
@@ -113,6 +128,7 @@ def delete_article(art_id):
     return redirect('/profile/' + str(current_user.id))
 
 
+# Редактировать статью
 @app.route('/edit_article/<int:art_id>', methods=['GET', 'POST'])
 @login_required
 def edit_article(art_id):
@@ -129,9 +145,10 @@ def edit_article(art_id):
         return redirect('/profile/' + str(current_user.id))
     with open(article['text']) as fp:
         text = fp.read()
-    return render_template("edit_article.html", articl=article, tex=text, form=form)
+    return render_template("edit_article.html", title='Редактирование', articl=article, tex=text, form=form)
 
 
+# Новая статья
 @app.route('/new_article', methods=['GET', 'POST'])
 @login_required
 def new_article():
@@ -146,17 +163,20 @@ def new_article():
         post('http://localhost:5000/api/v2/list_art',
              json={'title': form.title.data,
                    'author': current_user.id,
-                   'text': name}).json()
+                   'text': name,
+                   'tegs': form.tegs.data}).json()
         return redirect('/complete')
     return render_template('new.html', title='Новая статья', form=form)
 
 
+# Успешная регистрация статья
 @app.route('/complete')
 @login_required
 def complete():
     return render_template('complete.html', title="Успешно")
 
 
+# Прочтение конкретной статьи
 @app.route('/art/<int:art_id>')
 @login_required
 def art(art_id):
@@ -166,9 +186,10 @@ def art(art_id):
     with open(lis['text']) as fp:
         text = fp.read()
     html = markdown.markdown(text)
-    return render_template('art.html', title=lis['title'], text=html)
+    return render_template('art.html', title=lis['title'], text=html, tag=lis['tags'])
 
 
+# Список всех статей
 @app.route('/articles')
 @login_required
 def list_article():
@@ -176,6 +197,7 @@ def list_article():
     return render_template('list_art.html', title='Все статьи', lis=lis)
 
 
+# Конкретный профиль пользователя
 @app.route('/profile/<int:use_id>')
 @login_required
 def profile(use_id):
@@ -184,9 +206,11 @@ def profile(use_id):
     log = lis['email'].split("@")
     name = lis['surname'] + " " + lis['name']
     return render_template('Profile_user.html', title=log[0], log_name=log[0], full_name=name, email=lis['email'],
-                           country=lis['country'], sex=lis['sex'], art_list=art_list, id=lis['id'], status=lis['access'])
+                           country=lis['country'], sex=lis['sex'], art_list=art_list, id=lis['id'],
+                           status=lis['access'])
 
 
+# Редактировать профиль
 @app.route('/edit_profile/<int:use_id>', methods=['GET', 'POST'])
 @login_required
 def edit_profile(use_id):
@@ -205,6 +229,7 @@ def edit_profile(use_id):
                            country=lis['country'], sex=lis['sex'], form=form)
 
 
+# Регистрация пользователя
 @app.route("/register", methods=['GET', 'POST'])
 def register():
     form = UserForm()
@@ -229,10 +254,13 @@ def register():
         user.set_password(form.password.data)
         db_sess.add(user)
         db_sess.commit()
+        m = MAIL()
+        m.register_mail()
         return redirect('/login')
     return render_template('register.html', title='Регистрация', form=form)
 
 
+# Вход пользователя
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -248,6 +276,7 @@ def login():
     return render_template('login.html', title='Авторизация', form=form)
 
 
+# Выход из аккаунта
 @app.route('/logout')
 @login_required
 def logout():

@@ -38,6 +38,11 @@ def access_level():
     return current_user.access_level == 0
 
 
+def error():
+    # Функция выводит сообщение об ошибке!
+    # Предлогает пользователю вернуться на предыдущюю страницу, через нажатие единственной кнопки!
+    pass
+
 # @app.route('/about')
 # @login_required
 # def about():
@@ -77,10 +82,12 @@ def admin_panel_users():
 def up_article(art_id):
     put('http://localhost:5000/api/v2/art/' + str(art_id),
         json={'status': 0}).json()
-    m = MAIL()
-    m.open_article()
-    print(1)
-    return redirect("/admin_panel")
+    m = MAIL(current_user.email)
+    if m.open_article() == {'success': 'OK'}:
+        return redirect("/admin_panel")
+    else:
+        error()
+        return f'''Ошибка'''
 
 
 # Скрыть статью с сайта
@@ -165,7 +172,12 @@ def new_article():
                    'author': current_user.id,
                    'text': name,
                    'tegs': form.tegs.data}).json()
-        return redirect('/complete')
+        m = MAIL(current_user.email)
+        if m.new_article() == {'success': 'OK'}:
+            return redirect('/complete')
+        else:
+            error()
+            return f'''Ошибка''' # Дописать страницу вывода сообщения об ошибке
     return render_template('new.html', title='Новая статья', form=form)
 
 
@@ -203,11 +215,15 @@ def list_article():
 def profile(use_id):
     art_list = get('http://localhost:5000/api/v2/list_art').json()
     lis = get('http://localhost:5000/api/v2/user/' + str(use_id)).json()
-    log = lis['email'].split("@")
-    name = lis['surname'] + " " + lis['name']
-    return render_template('Profile_user.html', title=log[0], log_name=log[0], full_name=name, email=lis['email'],
-                           country=lis['country'], sex=lis['sex'], art_list=art_list, id=lis['id'],
-                           status=lis['access'])
+    if lis != {'error': 'FAIL'}:
+        log = lis['email'].split("@")
+        name = lis['surname'] + " " + lis['name']
+        return render_template('Profile_user.html', title=log[0], log_name=log[0], full_name=name, email=lis['email'],
+                               country=lis['country'], sex=lis['sex'], art_list=art_list, id=lis['id'],
+                               status=lis['access'])
+    else:
+        return f'''Просим прощения, но возникла некая ошибка на нашей стороне. 
+        Мы делаем все возможное, чтобы ее исправить как можно скорее!'''
 
 
 # Редактировать профиль
@@ -254,9 +270,12 @@ def register():
         user.set_password(form.password.data)
         db_sess.add(user)
         db_sess.commit()
-        m = MAIL()
-        m.register_mail()
-        return redirect('/login')
+        m = MAIL(form.email.data)
+        if m.register_mail() == {'success': 'OK'}:
+            return redirect('/login')
+        else:
+            error()
+            return f'''Ошибка'''
     return render_template('register.html', title='Регистрация', form=form)
 
 

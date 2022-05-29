@@ -21,11 +21,14 @@ def abort_if_user_not_found(user_id):
 class UserResource(Resource):
     def get(self, user_id):
         abort_if_user_not_found(user_id)
-        session = db_session.create_session()
-        use = session.query(User).get(user_id)
-        return jsonify(
-            {'id': use.id, 'name': use.name, 'surname': use.surname, 'email': use.email, 'country': use.country,
-             'sex': use.sex, "access": use.access_level})
+        try:
+            session = db_session.create_session()
+            use = session.query(User).get(user_id)
+            return jsonify(
+                {'id': use.id, 'name': use.name, 'surname': use.surname, 'email': use.email, 'country': use.country,
+                 'sex': use.sex, "access": use.access_level})
+        except Exception:
+            return jsonify({'error': 'FAIL'})
 
     def put(self, user_id):
         abort_if_user_not_found(user_id)

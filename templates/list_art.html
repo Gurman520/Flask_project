@@ -3,11 +3,18 @@
 {% block content %}
 {% for d in lis %}
 {% if d['status'] == 0 %}
-<pre class="bg-info">
-    <a href="/art/{{d['id'] }}" class="text-warning">  <H2><strong>{{d['title']}} {{d['id']}}.</strong></H2> </a>
-    <!--<H2><strong>{{d['title']}} {{d['id']}}.</strong></H2>-->
-    <H3>Некое описание моей прекрасной статьи</H3>
-</pre>
+</br>
+<div class="col-md-12">
+    <div class="card mb-4">
+        <div class="card-body">
+            <a href="/art/{{d['id'] }}" class="text-warning" style="text-align: center;">  <H1><strong>{{d['title']}}</strong></H1> </a> </br>
+            <H3>Теги:</H3> </br>
+            {% for item in d['tags']%}
+            <a class="btn btn-secondary">{{item}}</a> <br>
+            {% endfor %}
+        </div>
+    </div>
+</div>
 {% endif %}
 {% endfor %}
 {% endblock %}

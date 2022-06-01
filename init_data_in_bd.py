@@ -2,7 +2,7 @@ from data import db_session
 from data.tables import User, Tag, Article
 
 
-def add_user(surname, name, level, country, email, sex, password):
+def add_user(surname, name, level, country, email, sex, password, vk, git):
     user_n = User()
 
     user_n.surname = surname
@@ -11,6 +11,8 @@ def add_user(surname, name, level, country, email, sex, password):
     user_n.country = country
     user_n.email = email
     user_n.sex = sex
+    user_n.vk = vk
+    user_n.GitHub = git
     if password != '':
         user_n.set_password(password)
 
@@ -50,7 +52,8 @@ def add_article(title, txt, author, status, tagg):
 def main():
     db_session.global_init("db/my_project.db")
     # добавление записи
-    add_user("Sulima", "Roman", 0, "Russian", "Roman.Python.test@gmail.com", "man", "Rdfhnbhf142")
+    add_user("Sulima", "Roman", 0, "Russian", "Roman.Python.test@gmail.com", "man", "Rdfhnbhf142",
+             "http://vk.com/furman521", "https://github.com/Gurman520")
     add_tags("python", '')
     add_tags("HTML", '')
     add_tags("ML_learning", '')

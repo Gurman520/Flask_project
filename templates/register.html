@@ -73,6 +73,28 @@
     </p>
 
 
+    <p>
+        {{ form.vk.label }}<br>
+        {{ form.vk(class="form-control") }}<br>
+        {% for error in form.vk.errors %}
+    <p class="alert alert-danger" role="alert">
+        {{ error }}
+    </p>
+    {% endfor %}
+    </p>
+
+
+    <p>
+        {{ form.git.label }}<br>
+        {{ form.git(class="form-control") }}<br>
+        {% for error in form.git.errors %}
+    <p class="alert alert-danger" role="alert">
+        {{ error }}
+    </p>
+    {% endfor %}
+    </p>
+
+
     <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
     {{message}}
 </form>

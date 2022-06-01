@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect
+from flask import Flask, render_template, redirect, make_response, jsonify
 from data import db_session
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from data.tables import User, Tag, Article
@@ -35,6 +35,10 @@ def index():
 # Функция проверки уровня пользователя
 def access_level():
     # Проверка, что пользователь администратор
+    return current_user.access_level < 2
+
+
+def access_level_nul():
     return current_user.access_level == 0
 
 
@@ -42,14 +46,6 @@ def error():
     # Функция выводит сообщение об ошибке!
     # Предлогает пользователю вернуться на предыдущюю страницу, через нажатие единственной кнопки!
     pass
-
-# @app.route('/about')
-# @login_required
-# def about():
-#     with open("static/article/about.md", encoding="utf-8") as fp:
-#         text = fp.read()
-#     html = markdown.markdown(text)
-#     return render_template("about.html", title="About Author", text=html)
 
 
 # Функция вызова страницы админ панели
@@ -68,7 +64,7 @@ def admin_panel():
 @app.route('/admin_panel/users')
 @login_required
 def admin_panel_users():
-    if access_level():
+    if access_level_nul():
         lis = get('http://localhost:5000/api/v2/list_user').json()  # получаем список пользователей
         return render_template("all_profile.html", title='Admin Users', lis=lis)
     else:
@@ -83,11 +79,10 @@ def up_article(art_id):
     put('http://localhost:5000/api/v2/art/' + str(art_id),
         json={'status': 0}).json()
     m = MAIL(current_user.email)
-    if m.open_article() == {'success': 'OK'}:
+    if m.open_article():
         return redirect("/admin_panel")
     else:
         error()
-        return f'''Ошибка'''
 
 
 # Скрыть статью с сайта
@@ -96,22 +91,48 @@ def up_article(art_id):
 def down_article(art_id):
     put('http://localhost:5000/api/v2/art/' + str(art_id),
         json={'status': 1}).json()
-    return redirect("/admin_panel")
+    m = MAIL(current_user.email)
+    if m.close_article():
+        return redirect("/admin_panel")
+    else:
+        error()
 
 
-# Повысить пользователя до админа
-@app.route('/up_root_user/<int:use_id>')
+# Заброковать статью
+@app.route('/lose_article/<int:art_id>')
 @login_required
-def up_root_user(use_id):
+def lose_article(art_id):
+    put('http://localhost:5000/api/v2/art/' + str(art_id),
+        json={'status': 2}).json()
+    m = MAIL(current_user.email)
+    if m.lose_article():
+        return redirect("/admin_panel")
+    else:
+        error()
+
+
+# Повысить пользователя до root
+@app.route('/root_user/<int:use_id>')
+@login_required
+def root_user(use_id):
     put('http://localhost:5000/api/v2/user/' + str(use_id),
         json={'level': 0}).json()
     return redirect("/admin_panel/users")
 
 
 # Понизить пользователя до обычного пользователя
-@app.route('/down_root_user/<int:use_id>')
+@app.route('/readit_user/<int:use_id>')
 @login_required
-def down_root_user(use_id):
+def readit_user(use_id):
+    put('http://localhost:5000/api/v2/user/' + str(use_id),
+        json={'level': 2}).json()
+    return redirect("/admin_panel/users")
+
+
+# Сделать пользователя модератором
+@app.route('/moderator_user/<int:use_id>')
+@login_required
+def moderator_user(use_id):
     put('http://localhost:5000/api/v2/user/' + str(use_id),
         json={'level': 1}).json()
     return redirect("/admin_panel/users")
@@ -173,11 +194,10 @@ def new_article():
                    'text': name,
                    'tegs': form.tegs.data}).json()
         m = MAIL(current_user.email)
-        if m.new_article() == {'success': 'OK'}:
+        if m.new_article():
             return redirect('/complete')
         else:
             error()
-            return f'''Ошибка''' # Дописать страницу вывода сообщения об ошибке
     return render_template('new.html', title='Новая статья', form=form)
 
 
@@ -190,10 +210,8 @@ def complete():
 
 # Прочтение конкретной статьи
 @app.route('/art/<int:art_id>')
-@login_required
 def art(art_id):
     st = 'http://localhost:5000/api/v2/art/' + str(art_id)
-    print(st)
     lis = get(st).json()
     with open(lis['text']) as fp:
         text = fp.read()
@@ -203,7 +221,7 @@ def art(art_id):
 
 # Список всех статей
 @app.route('/articles')
-@login_required
+# @login_required
 def list_article():
     lis = get('http://localhost:5000/api/v2/list_art').json()
     return render_template('list_art.html', title='Все статьи', lis=lis)
@@ -217,10 +235,7 @@ def profile(use_id):
     lis = get('http://localhost:5000/api/v2/user/' + str(use_id)).json()
     if lis != {'error': 'FAIL'}:
         log = lis['email'].split("@")
-        name = lis['surname'] + " " + lis['name']
-        return render_template('Profile_user.html', title=log[0], log_name=log[0], full_name=name, email=lis['email'],
-                               country=lis['country'], sex=lis['sex'], art_list=art_list, id=lis['id'],
-                               status=lis['access'])
+        return render_template('Profile_user.html', lis=lis, title=log[0], log_name=log[0], art_list=art_list)
     else:
         return f'''Просим прощения, но возникла некая ошибка на нашей стороне. 
         Мы делаем все возможное, чтобы ее исправить как можно скорее!'''
@@ -231,18 +246,19 @@ def profile(use_id):
 @login_required
 def edit_profile(use_id):
     form = UpdateUserForm()
-    if form.validate_on_submit():
-        put('http://localhost:5000/api/v2/user/' + str(use_id),
-            json={'f_name': form.f_name.data, 's_name': form.s_name.data, 'sex': form.sex.data[0],
-                  'country': form.country.data, 'email': form.email.data}).json()
-        return redirect("/profile/" + str(use_id))
-    else:
-        print("error")
     lis = get('http://localhost:5000/api/v2/user/' + str(use_id)).json()
+    if form.validate_on_submit():
+        if len(form.sex.data) == 0:
+            sex = lis['sex']
+        else:
+            sex = form.sex.data[0]
+        put('http://localhost:5000/api/v2/user/' + str(use_id),
+            json={'f_name': form.f_name.data, 's_name': form.s_name.data, 'sex': sex,
+                  'country': form.country.data, 'email': form.email.data, 'vk': form.vk.data,
+                  'git': form.git.data}).json()
+        return redirect("/profile/" + str(use_id))
     log = lis['email'].split("@")
-    return render_template('edit_profile.html', title=log[0], log_name=log[0], f_name=lis['name'],
-                           s_name=lis['surname'], email=lis['email'],
-                           country=lis['country'], sex=lis['sex'], form=form)
+    return render_template('edit_profile.html', title=log[0], log_name=log[0], form=form, lis=lis)
 
 
 # Регистрация пользователя
@@ -263,15 +279,17 @@ def register():
             surname=form.s_name.data,
             name=form.f_name.data,
             email=form.email.data,
-            access_level=1,
+            access_level=2,
             country=form.country.data,
-            sex=form.sex.data[0]
+            sex=form.sex.data[0],
+            vk=form.vk.data,
+            GitHub=form.git.data
         )
         user.set_password(form.password.data)
         db_sess.add(user)
         db_sess.commit()
         m = MAIL(form.email.data)
-        if m.register_mail() == {'success': 'OK'}:
+        if m.register_mail():
             return redirect('/login')
         else:
             error()
@@ -301,6 +319,21 @@ def login():
 def logout():
     logout_user()
     return redirect("/")
+
+
+@app.errorhandler(401)
+def not_found(error):
+    return render_template("Not_login.html", title="Не авторизован")
+
+
+@app.errorhandler(404)
+def not_found(error):
+    return render_template("Not_found.html", title="Не найдено")
+
+
+@app.errorhandler(500)
+def not_found(error):
+    return render_template("Danger.html", title="Наша ошибка")
 
 
 def main():

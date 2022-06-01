@@ -10,7 +10,7 @@ class MAIL:
         # create message object instance
         self.msg = MIMEMultipart()
         # setup the parameters of the message
-        self.password = "*********"
+        self.password = "Rdfhnbhf142"
         self.msg['From'] = "roman.python.test@gmail.com"
         self.msg['To'] = adres
         # create server
@@ -22,33 +22,66 @@ class MAIL:
     def register_mail(self):
         try:
             self.msg['Subject'] = "Уведомление"
-            message = "Регистрация прошла успешно!" \
-                      "Благодарим за регистрацию на нашем сайте."
+            message = " Поздравляем, регистрация прошла успешно!" \
+                      "Теперь вам доступны все функции нашего сайта!" \
+                      "С уважением команда, Read_ART."
             self.msg.attach(MIMEText(message, 'plain'))
             # send the message via the server.
             self.server.sendmail(self.msg['From'], self.msg['To'], self.msg.as_string())
-            return jsonify({'success': 'OK'})
+            return True
         except Exception:
-            return jsonify({'error': 'Fail send message'})
+            return False
 
     def open_article(self):
         try:
             self.msg['Subject'] = "Уведомление"
-            message = "Ваша статья опубликована!"
+            message = "Поздравляем, ваша статья опубликована на сайте!" \
+                      "С уважением команда, Read_ART."
             self.msg.attach(MIMEText(message, 'plain'))
             # send the message via the server.
             self.server.sendmail(self.msg['From'], self.msg['To'], self.msg.as_string())
-            return jsonify({'success': 'OK'})
+            return True
         except Exception:
-            return jsonify({'error': 'Fail send message'})
+            return False
+
+    def close_article(self):
+        try:
+            self.msg['Subject'] = "Уведомление"
+            message = "Ваша статья не удовлетворяет некоторым нашим требованиям.\n" \
+                      " Мы просим вас внести изменения и попробывать снова.\n" \
+                      "С уважением, команда Read_ART."
+            self.msg.attach(MIMEText(message, 'plain'))
+            # send the message via the server.
+            self.server.sendmail(self.msg['From'], self.msg['To'], self.msg.as_string())
+            return True
+        except Exception:
+            return False
 
     def new_article(self):
         try:
             self.msg['Subject'] = "Уведомление"
-            message = "Ваша статья принята на проверку."
+            message = "Ваша статья отправлена на модерацию.\n" \
+                      "Обычно моедрация длится не более 2-3 дней.\n" \
+                      "По итогам проверки нашими модератарами, вам придет результат. " \
+                      "За состоянием вашей статьи вы можете наблюдать в личном кабинете.\n" \
+                      "С уважением команда, Read_ART."
             self.msg.attach(MIMEText(message, 'plain'))
             # send the message via the server.
             self.server.sendmail(self.msg['From'], self.msg['To'], self.msg.as_string())
-            return jsonify({'success': 'OK'})
+            return True
         except Exception:
-            return jsonify({'error': 'Fail send message'})
+            return False
+
+    def lose_article(self):
+        try:
+            self.msg['Subject'] = "Уведомление"
+            message = "К сожалению ваша статья нарушила наши правила, по этому мы приняли решение,\n" \
+                      " что ваша статья не может быть опубликована на нашем сайте и не подлежит дальнейшей дороботки.\n" \
+                      "Если вы считаете, что произошла, напишите на почту, с которой пришло сообщение.\n" \
+                      "С уважением команда, Read_ART! "
+            self.msg.attach(MIMEText(message, 'plain'))
+            # send the message via the server.
+            self.server.sendmail(self.msg['From'], self.msg['To'], self.msg.as_string())
+            return True
+        except Exception:
+            return False

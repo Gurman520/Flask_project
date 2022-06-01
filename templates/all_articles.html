@@ -2,17 +2,30 @@
 
 {% block content %}
 <H1 style="text-align: center;"><strong>Добро пожаловать, {{current_user.name}}</strong></H1>
-<H2><strong>Если хочешь администрировать пользователей, то нажми на кнопку ниже:</strong></H2>
-<a class="btn btn-primary " href="/admin_panel/users">Пользователи!</a>
+{% if current_user.access_level == 0 %}
+    <H2><strong>Если хочешь администрировать пользователей, то нажми на кнопку ниже:</strong></H2>
+    <a class="btn btn-primary " href="/admin_panel/users">Пользователи!</a>
+{% endif %}
 <br />
 {% for d in lis %}
-<pre class="bg-info">
-    <a href="/art/{{d['id'] }}" class="text-warning">  <H2><strong>{{d['title']}}</strong></H2> </a>
-    {% if d['status'] == 1 %}
-    <a class="btn btn-info " href="/up_article/{{d['id']}}">Опубликовать статью</a>
-    {% else %}
-    <a class="btn btn-info " href="/down_article/{{d['id']}}">Скрыть статью</a>
-    {% endif %}
-</pre>
+
+</br>
+<div class="col-md-12">
+    <div class="card mb-4">
+        <div class="card-body">
+            <a href="/art/{{d['id'] }}" class="text-warning" style="text-align: center;">  <H1><strong>{{d['title']}}</strong></H1> </a> </br>
+            <H3>Теги:</H3> </br>
+            {% for item in d['tags']%}
+            <a class="btn btn-secondary">{{item}}</a> <br>
+            {% endfor %}
+        </div>
+        {% if d['status'] == 1 %}
+        <a class="btn btn-success " href="/up_article/{{d['id']}}">Опубликовать статью</a>
+        {% else %}
+        <a class="btn btn-info " href="/down_article/{{d['id']}}">Скрыть статью</a>
+        {% endif %}
+        <a class="btn btn-danger " href="/lose_article/{{d['id']}}">Заброковать статью</a>
+    </div>
+</div>
 {% endfor %}
 {% endblock %}

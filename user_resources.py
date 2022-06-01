@@ -26,7 +26,7 @@ class UserResource(Resource):
             use = session.query(User).get(user_id)
             return jsonify(
                 {'id': use.id, 'name': use.name, 'surname': use.surname, 'email': use.email, 'country': use.country,
-                 'sex': use.sex, "access": use.access_level})
+                 'sex': use.sex, "access": use.access_level, 'vk': use.vk, 'git': use.GitHub})
         except Exception:
             return jsonify({'error': 'FAIL'})
 
@@ -46,6 +46,10 @@ class UserResource(Resource):
             use.email = request.json['email']
         if 'level' in request.json:
             use.access_level = request.json['level']
+        if 'vk' in request.json:
+            use.vk = request.json['vk']
+        if 'git' in request.json:
+            use.GitHub = request.json['git']
         session.commit()
         return jsonify({'success': 'OK'})
 

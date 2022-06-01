@@ -25,7 +25,7 @@
 <!--            <li class="nav-item">-->
 <!--                <a class="navbar-text" href="/about"><strong>Обо мне</strong></a>-->
 <!--            </li>-->
-            {% if current_user.id == 1 %}
+            {% if current_user.access_level != 2 %}
             <li class="nav-item">
                 <a class="navbar-text" href="/admin_panel"><strong>Админ панель</strong></a>
             </li>

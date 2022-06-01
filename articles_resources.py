@@ -55,7 +55,8 @@ class ArticleListResource(Resource):
         db_sess = db_session.create_session()
         art = db_sess.query(Article)
         return jsonify(
-            [{'id': item.id, 'title': item.title, 'author': item.author, 'text': item.text, 'status': item.status} for item in art])
+            [{'id': item.id, 'title': item.title, 'author': item.author, 'text': item.text, 'status': item.status,
+              'tags': [i.name for i in item.tags]} for item in art])
 
     def post(self):
         args = parser.parse_args()

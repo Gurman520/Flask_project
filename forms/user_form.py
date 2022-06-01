@@ -11,7 +11,8 @@ class UserForm(FlaskForm):
     f_name = StringField('Имя', validators=[DataRequired()])
     country = StringField("Страна", validators=[DataRequired()])
     sex = SelectMultipleField("Пол", choices=['man', 'women'], validators=[DataRequired()])
-
+    vk = StringField("Ссылка на вк")
+    git = StringField("Ссылка на GitHub")
     submit = SubmitField('Зарегестрироваться')
 
 
@@ -21,5 +22,7 @@ class UpdateUserForm(FlaskForm):
     f_name = StringField('Имя')
     country = StringField("Страна")
     sex = SelectMultipleField("Пол", choices=['man', 'women'])
+    vk = StringField("Ссылка на вк")
+    git = StringField("Ссылка на GitHub")
 
     submit = SubmitField('Сохранить')

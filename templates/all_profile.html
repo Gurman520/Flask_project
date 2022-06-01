@@ -1,16 +1,29 @@
 {% extends "base.html" %}
-
 {% block content %}
+<H1 style="text-align: center;"><strong>Добро пожаловать, {{current_user.name}}</strong></H1>
 {% for d in lis %}
 {% if d['id'] != current_user.id %}
-<pre class="bg-info">
-    <a href="/profile/{{d['id'] }}" class="text-warning">  <H2><strong>{{d['surname']}} {{d['name']}}</strong></H2> </a>
-    {% if d['level'] == 1 %}
-    <a class="btn btn-info " href="/up_root_user/{{d['id']}}">Сделать пользователя Админом</a>
-    {% else %}
-    <a class="btn btn-info " href="/down_root_user/{{d['id']}}">Понизить ранг пользователя</a>
-    {% endif %}
-</pre>
+
+</br>
+<div class="col-md-12">
+    <div class="card mb-4">
+        <div class="card-body">
+            <a href="/profile/{{d['id'] }}" class="text-warning" style="text-align: center;">  <H2><strong>{{d['surname']}} {{d['name']}}</strong></H2> </a>
+        </div>
+        {% if d['level'] == 0 %}
+        <a class="btn btn-info " href="/moderator_user/{{d['id']}}">Сделать пользователя модератором</a>
+        <a class="btn btn-danger " href="/readit_user/{{d['id']}}">Читатель</a>
+        {% endif %}
+        {% if d['level'] == 1 %}
+        <a class="btn btn-info " href="/root_user/{{d['id']}}">Сделать пользователя root пользователем</a>
+        <a class="btn btn-danger " href="/readit_user/{{d['id']}}">Читатель</a>
+        {% endif %}
+        {% if d['level'] == 2 %}
+        <a class="btn btn-success " href="/root_user/{{d['id']}}">Сделать пользователя root пользователем</a>
+        <a class="btn btn-info " href="/moderator_user/{{d['id']}}">Сделать пользователя модератором</a>
+        {% endif %}
+    </div>
+</div>
 {% endif %}
 {% endfor %}
 {% endblock %}

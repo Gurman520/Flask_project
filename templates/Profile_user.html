@@ -28,8 +28,10 @@
                             {% endif %}
                             <div class="mt-3">
                                 <h4>{{log_name}}</h4>
-                                {% if status == 0 %}
-                                <p class="text-secondary mb-1"> ADMIN </p>
+                                {% if lis['access'] == 0 %}
+                                <p class="text-secondary mb-1"> ROOT </p>
+                                {% elif lis['access'] == 1 %}
+                                <p class="text-secondary mb-1"> Модератор </p>
                                 {% endif %}
                                 <p class="text-muted font-size-sm">{{lis['country']}}</p>
                             </div>
@@ -99,11 +101,13 @@
                             </div>
                         </div>
                         <hr>
+                        {% if current_user.id == lis['id'] or current_user.access_level == 0 %}
                         <div class="row">
                             <div class="col-sm-12">
                                 <a class="btn btn-info " href="/edit_profile/{{lis['id']}}">Edit</a>
                             </div>
                         </div>
+                        {% endif %}
                     </div>
                 </div>
                 </hr>
@@ -123,11 +127,12 @@
                                     <h4 class="text-danger"> Статья отклонена </h4>
                                     {% endif %}
                                 </div>
-
-                            </div>
-                            <a class="btn btn-info " href="/edit_article/{{d['id']}}">Edit</a>
-                            <a class="btn btn-danger " href="/delete_article/{{d['id']}}">Delete</a>
-                        </div>
+                                {% if current_user.id == lis['id'] or current_user.access_level == 0 %}
+                                </div>
+                                    <a class="btn btn-info " href="/edit_article/{{d['id']}}">Edit</a>
+                                    <a class="btn btn-danger " href="/delete_article/{{d['id']}}">Delete</a>
+                                </div>
+                                {% endif %}
                     </div>
                 {% endif %}
                 {% endfor %}

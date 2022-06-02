@@ -24,7 +24,8 @@ class ArticleResource(Resource):
         tag = list()
         for i in arts.tags:
             tag.append(i.name)
-        return jsonify({'title': arts.title, 'author': arts.author, 'text': arts.text, 'tags': tag})
+        return jsonify(
+            {'title': arts.title, 'author': arts.author, 'text': arts.text, 'tags': tag, 'status': arts.status})
 
     def put(self, art_id):
         abort_if_article_not_found(art_id)

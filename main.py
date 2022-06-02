@@ -43,9 +43,7 @@ def access_level_nul():
 
 
 def error():
-    # Функция выводит сообщение об ошибке!
-    # Предлогает пользователю вернуться на предыдущюю страницу, через нажатие единственной кнопки!
-    pass
+    return render_template("Danger.html", title="Наша ошибка")
 
 
 # Функция вызова страницы админ панели
@@ -56,8 +54,7 @@ def admin_panel():
         lis = get('http://localhost:5000/api/v2/list_art').json()  # получаем список статей
         return render_template("all_articles.html", title='Admin article', lis=lis)
     else:
-        return f'''<h1> Отказано в доступе, так как у вас нет права на посещение данной страницы! 
-        \n Если вы считаете, что произошла ошибка, то свяжитесь с нами по почте.</h1>'''
+        return render_template("acesses.html", title='Отказано в доступе')
 
 
 # Админ панель пользователей
@@ -68,8 +65,7 @@ def admin_panel_users():
         lis = get('http://localhost:5000/api/v2/list_user').json()  # получаем список пользователей
         return render_template("all_profile.html", title='Admin Users', lis=lis)
     else:
-        return f'''<h1> Отказано в доступе, так как у вас нет права на посещение данной страницы! 
-               \n Если вы считаете, что произошла ошибка, то свяжитесь с нами по почте.</h1>'''
+        return render_template("acesses.html", title='Отказано в доступе')
 
 
 # Опубликовать статью
@@ -160,20 +156,23 @@ def delete_article(art_id):
 @app.route('/edit_article/<int:art_id>', methods=['GET', 'POST'])
 @login_required
 def edit_article(art_id):
-    form = EditArticleForm()
     article = get('http://localhost:5000/api/v2/art/' + str(art_id)).json()
-    if form.validate_on_submit():
-        print(form.text.data)
-        f = open(article['text'], 'w')
-        f.write(form.text.data)
-        f.close()
-        put('http://localhost:5000/api/v2/art/' + str(art_id),
-            json={'title': form.title.data,
-                  'text': article['text']}).json()
-        return redirect('/profile/' + str(current_user.id))
-    with open(article['text']) as fp:
-        text = fp.read()
-    return render_template("edit_article.html", title='Редактирование', articl=article, tex=text, form=form)
+    if current_user.id == article['author'] or current_user.acesses_level == 0:
+        form = EditArticleForm()
+        if form.validate_on_submit():
+            print(form.text.data)
+            f = open(article['text'], 'w')
+            f.write(form.text.data)
+            f.close()
+            put('http://localhost:5000/api/v2/art/' + str(art_id),
+                json={'title': form.title.data,
+                      'text': article['text']}).json()
+            return redirect('/profile/' + str(current_user.id))
+        with open(article['text']) as fp:
+            text = fp.read()
+        return render_template("edit_article.html", title='Редактирование', articl=article, tex=text, form=form)
+    else:
+        return render_template("acesses.html", title='Отказано в доступе')
 
 
 # Новая статья
@@ -211,12 +210,14 @@ def complete():
 # Прочтение конкретной статьи
 @app.route('/art/<int:art_id>')
 def art(art_id):
-    st = 'http://localhost:5000/api/v2/art/' + str(art_id)
-    lis = get(st).json()
-    with open(lis['text']) as fp:
-        text = fp.read()
-    html = markdown.markdown(text)
-    return render_template('art.html', title=lis['title'], text=html, tag=lis['tags'])
+    lis = get('http://localhost:5000/api/v2/art/' + str(art_id)).json()
+    if lis['status'] == 0 or current_user.id == lis['author'] or current_user.access_level != 2:
+        with open(lis['text']) as fp:
+            text = fp.read()
+        html = markdown.markdown(text)
+        return render_template('art.html', title=lis['title'], text=html, tag=lis['tags'])
+    else:
+        return render_template("acesses.html", title='Отказано в доступе')
 
 
 # Список всех статей
@@ -245,20 +246,23 @@ def profile(use_id):
 @app.route('/edit_profile/<int:use_id>', methods=['GET', 'POST'])
 @login_required
 def edit_profile(use_id):
-    form = UpdateUserForm()
-    lis = get('http://localhost:5000/api/v2/user/' + str(use_id)).json()
-    if form.validate_on_submit():
-        if len(form.sex.data) == 0:
-            sex = lis['sex']
-        else:
-            sex = form.sex.data[0]
-        put('http://localhost:5000/api/v2/user/' + str(use_id),
-            json={'f_name': form.f_name.data, 's_name': form.s_name.data, 'sex': sex,
-                  'country': form.country.data, 'email': form.email.data, 'vk': form.vk.data,
-                  'git': form.git.data}).json()
-        return redirect("/profile/" + str(use_id))
-    log = lis['email'].split("@")
-    return render_template('edit_profile.html', title=log[0], log_name=log[0], form=form, lis=lis)
+    if current_user.id == use_id or current_user.access_level == 0:  # Редактировать профиль может, только сам пользователь и ROOT пользователь.
+        form = UpdateUserForm()
+        lis = get('http://localhost:5000/api/v2/user/' + str(use_id)).json()
+        if form.validate_on_submit():
+            if len(form.sex.data) == 0:  # Дополнительная проверка, что если пользователь не выбрал пол, то он устанавливает тот, что уже был
+                sex = lis['sex']
+            else:
+                sex = form.sex.data[0]
+            put('http://localhost:5000/api/v2/user/' + str(use_id),
+                json={'f_name': form.f_name.data, 's_name': form.s_name.data, 'sex': sex,
+                      'country': form.country.data, 'email': form.email.data, 'vk': form.vk.data,
+                      'git': form.git.data}).json()
+            return redirect("/profile/" + str(use_id))
+        log = lis['email'].split("@")
+        return render_template('edit_profile.html', title=log[0], log_name=log[0], form=form, lis=lis)
+    else:
+        return render_template("acesses.html", title='Отказано в доступе')
 
 
 # Регистрация пользователя

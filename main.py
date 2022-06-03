@@ -244,9 +244,7 @@ def list_article():
 @login_required
 def profile(use_id):
     art_list = get('http://localhost:5000/api/v2/list_art').json()
-    print(art_list[0])
     lis = get('http://localhost:5000/api/v2/user/' + str(use_id)).json()
-    print(lis)
     if lis != {'error': 'FAIL'}:
         log = lis['email'].split("@")
         return render_template('Profile_user.html', lis=lis, title=log[0], log_name=log[0], art_list=art_list)

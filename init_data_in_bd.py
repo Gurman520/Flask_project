@@ -52,8 +52,8 @@ def add_article(title, txt, author, status, tagg):
 def main():
     db_session.global_init("db/my_project.db")
     # добавление записи
-    add_user("Sulima", "Roman", 0, "Russian", "Roman.Python.test@gmail.com", "man", "Rdfhnbhf142",
-             "http://vk.com/furman521", "https://github.com/Gurman520")
+    add_user("Sulima", "Roman", 0, "Russian", "*************", "man", "*******************",
+             "************", "https://github.com/Gurman520")
     add_tags("python", '')
     add_tags("HTML", '')
     add_tags("ML_learning", '')

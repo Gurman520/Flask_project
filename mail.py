@@ -12,7 +12,7 @@ class MAIL:
         self.msg = MIMEMultipart()
         # setup the parameters of the message
         self.password = TOKEN.password
-        self.msg['From'] = "roman.python.test@gmail.com"
+        self.msg['From'] = TOKEN.mail
         self.msg['To'] = adres
         # create server
         self.server = smtplib.SMTP("smtp.gmail.com", 587)

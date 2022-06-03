@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="col-md-12">
+    <div class="card mb-4">
+        <div class="card-body">
+            <H3>Теги:</H3> </br>
+            {% for item in teg %}
+                <button disabled class="btn btn-secondary">{{item}}</button>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<p>&nbsp;</p>
+<div class="col-md-12">
+    <div class="card mb-4">
+        <div class="card-body">
+            <form action="" method="post">
+                {{ form.hidden_tag() }}
+                <div class="row mb-3">
+                    <div class="col-sm-3">
+                        <h6 class="mb-0">{{ form.name.label }}</h6>
+                    </div>
+                    <div class="col-sm-9 text-secondary">
+                        {{ form.name(class="form-control") }}
+                    </div>
+                </div>
+                <div class="row">
+                    {{ form.submit(type="submit", class="btn btn-primary px-4") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

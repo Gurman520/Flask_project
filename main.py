@@ -4,7 +4,7 @@ from flask_login import LoginManager, login_user, login_required, logout_user, c
 from data.tables import User, Tag, Article
 from forms.user_form import UserForm, UpdateUserForm
 from forms.login_form import LoginForm
-from forms.article_form import ArticleForm, EditArticleForm
+from forms.article_form import ArticleForm, EditArticleForm, AddTeg
 from flask_restful import Api
 import articles_resources
 import user_resources
@@ -43,7 +43,7 @@ def access_level_nul():
 
 
 def error():
-    return render_template("Danger.html", title="Наша ошибка")
+    return render_template("Error.html", title="Наша ошибка", error=500)
 
 
 # Функция вызова страницы админ панели
@@ -54,7 +54,7 @@ def admin_panel():
         lis = get('http://localhost:5000/api/v2/list_art').json()  # получаем список статей
         return render_template("all_articles.html", title='Admin article', lis=lis)
     else:
-        return render_template("acesses.html", title='Отказано в доступе')
+        return render_template("Error.html", title='Отказано в доступе', error=1)
 
 
 # Админ панель пользователей
@@ -65,7 +65,18 @@ def admin_panel_users():
         lis = get('http://localhost:5000/api/v2/list_user').json()  # получаем список пользователей
         return render_template("all_profile.html", title='Admin Users', lis=lis)
     else:
-        return render_template("acesses.html", title='Отказано в доступе')
+        return render_template("Error.html", title='Отказано в доступе', error=1)
+
+
+@app.route('/admin_panel/Teg', methods=['GET', 'POST'])
+@login_required
+def teg():
+    form = AddTeg()
+    lis = get('http://localhost:5000/api/v2/teg').json()
+    if form.validate_on_submit():
+        post('http://localhost:5000/api/v2/teg', json={'name': form.name.data}).json()
+        return redirect('/admin_panel/Teg')
+    return render_template('Teg.html', title='Теги', form=form, teg=lis['tags'])
 
 
 # Опубликовать статью
@@ -172,7 +183,7 @@ def edit_article(art_id):
             text = fp.read()
         return render_template("edit_article.html", title='Редактирование', articl=article, tex=text, form=form)
     else:
-        return render_template("acesses.html", title='Отказано в доступе')
+        return render_template("Error.html", title='Отказано в доступе', error=1)
 
 
 # Новая статья
@@ -204,7 +215,7 @@ def new_article():
 @app.route('/complete')
 @login_required
 def complete():
-    return render_template('complete.html', title="Успешно")
+    return render_template('Error.html', title="Успешно", error=100)
 
 
 # Прочтение конкретной статьи
@@ -215,9 +226,9 @@ def art(art_id):
         with open(lis['text']) as fp:
             text = fp.read()
         html = markdown.markdown(text)
-        return render_template('art.html', title=lis['title'], text=html, tag=lis['tags'])
+        return render_template('art.html', title=lis['title'], text=html, tag=lis['tags'], name=lis['author_name'])
     else:
-        return render_template("acesses.html", title='Отказано в доступе')
+        return render_template("Error.html", title='Отказано в доступе', error=404)
 
 
 # Список всех статей
@@ -233,13 +244,14 @@ def list_article():
 @login_required
 def profile(use_id):
     art_list = get('http://localhost:5000/api/v2/list_art').json()
+    print(art_list[0])
     lis = get('http://localhost:5000/api/v2/user/' + str(use_id)).json()
+    print(lis)
     if lis != {'error': 'FAIL'}:
         log = lis['email'].split("@")
         return render_template('Profile_user.html', lis=lis, title=log[0], log_name=log[0], art_list=art_list)
     else:
-        return f'''Просим прощения, но возникла некая ошибка на нашей стороне. 
-        Мы делаем все возможное, чтобы ее исправить как можно скорее!'''
+        return render_template("Error.html", title="Наша ошибка", error=500)
 
 
 # Редактировать профиль
@@ -262,7 +274,7 @@ def edit_profile(use_id):
         log = lis['email'].split("@")
         return render_template('edit_profile.html', title=log[0], log_name=log[0], form=form, lis=lis)
     else:
-        return render_template("acesses.html", title='Отказано в доступе')
+        return render_template("Error.html", title='Отказано в доступе', error=1)
 
 
 # Регистрация пользователя
@@ -327,17 +339,18 @@ def logout():
 
 @app.errorhandler(401)
 def not_found(error):
-    return render_template("Not_login.html", title="Не авторизован")
+    return render_template("Error.html", title="Не авторизован", error=error)
 
 
 @app.errorhandler(404)
 def not_found(error):
-    return render_template("Not_found.html", title="Не найдено")
+    return render_template("Error.html", title="Не найдено", error=error)
 
 
 @app.errorhandler(500)
 def not_found(error):
-    return render_template("Danger.html", title="Наша ошибка")
+    print(error)
+    return render_template("Error.html", title="Наша ошибка", error=error)
 
 
 def main():
@@ -348,6 +361,8 @@ def main():
 
     api.add_resource(articles_resources.ArticleListResource, '/api/v2/list_art')
     api.add_resource(user_resources.ListUserResource, '/api/v2/list_user')
+
+    api.add_resource(articles_resources.TegResource, '/api/v2/teg')
 
     app.run()
 

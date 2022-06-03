@@ -8,9 +8,10 @@
     <div class="card mb-4">
         <div class="card-body">
             <a href="/art/{{d['id'] }}" class="text-warning" style="text-align: center;">  <H1><strong>{{d['title']}}</strong></H1> </a> </br>
+            <a style="text-align: right;" href="/profile/{{d['author']}}"> <H3>Автор: {{d['author_name']}}</H3> </a>
             <H3>Теги:</H3> </br>
             {% for item in d['tags']%}
-            <a class="btn btn-secondary">{{item}}</a> <br>
+            <button disabled class="btn btn-secondary">{{item}}</button> 
             {% endfor %}
         </div>
     </div>

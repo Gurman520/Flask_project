@@ -5,6 +5,12 @@
 {% if current_user.access_level == 0 %}
     <H2><strong>Если хочешь администрировать пользователей, то нажми на кнопку ниже:</strong></H2>
     <a class="btn btn-primary " href="/admin_panel/users">Пользователи!</a>
+<p>&nbsp;</p>
+    <H2><strong>Если хочешь добавить новые теги, то нажми кнопку ниже:</strong></H2>
+    <a class="btn btn-primary " href="/admin_panel/Teg">Теги</a>
+<!--<p>&nbsp;</p>-->
+<!--    <H2><strong>Если хочешь добавить новую новость, то нажми кнопку ниже:</strong></H2>-->
+<!--    <a class="btn btn-primary " href="/admin_panel/news">Новости</a>-->
 {% endif %}
 <br />
 {% for d in lis %}
@@ -14,9 +20,10 @@
     <div class="card mb-4">
         <div class="card-body">
             <a href="/art/{{d['id'] }}" class="text-warning" style="text-align: center;">  <H1><strong>{{d['title']}}</strong></H1> </a> </br>
+            <H3 style="text-align: right;" href="/profile/{{d['author']}}">Автор: {{d['author_name']}}</H3>
             <H3>Теги:</H3> </br>
             {% for item in d['tags']%}
-            <a class="btn btn-secondary">{{item}}</a> <br>
+            <button disabled class="btn btn-secondary">{{item}}</button>
             {% endfor %}
         </div>
         {% if d['status'] == 1 %}

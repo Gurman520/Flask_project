@@ -1,7 +1,7 @@
 from flask import jsonify, request
 from flask_restful import Resource, abort, reqparse
 from data import db_session
-from data.tables import Article, Tag
+from data.tables import Article, Tag, User
 
 parser = reqparse.RequestParser()
 parser.add_argument('title', required=True)
@@ -25,7 +25,8 @@ class ArticleResource(Resource):
         for i in arts.tags:
             tag.append(i.name)
         return jsonify(
-            {'title': arts.title, 'author': arts.author, 'text': arts.text, 'tags': tag, 'status': arts.status})
+            {'title': arts.title, 'author': arts.author, 'author_name': session.query(User).get(arts.author).name,
+             'text': arts.text, 'tags': tag, 'status': arts.status})
 
     def put(self, art_id):
         abort_if_article_not_found(art_id)
@@ -56,7 +57,9 @@ class ArticleListResource(Resource):
         db_sess = db_session.create_session()
         art = db_sess.query(Article)
         return jsonify(
-            [{'id': item.id, 'title': item.title, 'author': item.author, 'text': item.text, 'status': item.status,
+            [{'id': item.id, 'title': item.title, 'author': item.author,
+              'author_name': db_sess.query(User).get(item.author).name,
+              'text': item.text, 'status': item.status,
               'tags': [i.name for i in item.tags]} for item in art])
 
     def post(self):
@@ -74,3 +77,19 @@ class ArticleListResource(Resource):
         session.add(art)
         session.commit()
         return jsonify({'success': 'OK'})
+
+
+class TegResource(Resource):
+    def post(self):
+        session = db_session.create_session()
+        teg = Tag(
+            name=request.json['name']
+        )
+        session.add(teg)
+        session.commit()
+        return jsonify({'success': 'OK'})
+
+    def get(self):
+        db_sess = db_session.create_session()
+        teg = db_sess.query(Tag)
+        return jsonify({'tags': [i.name for i in teg]})

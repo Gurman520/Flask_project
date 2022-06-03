@@ -1,6 +1,7 @@
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
+import TOKEN
 
 from flask import jsonify
 
@@ -10,7 +11,7 @@ class MAIL:
         # create message object instance
         self.msg = MIMEMultipart()
         # setup the parameters of the message
-        self.password = "Rdfhnbhf142"
+        self.password = TOKEN.password
         self.msg['From'] = "roman.python.test@gmail.com"
         self.msg['To'] = adres
         # create server

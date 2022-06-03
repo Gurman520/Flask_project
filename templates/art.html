@@ -12,12 +12,14 @@
          background-color: #E6E6FA;
     }
 </style>
+<H2>Автор: {{name}}</H2>
 
 <div class="col-md-8">
     <div class="card mb-3">
         <div class="card-body">
+            <h3>Теги:</h3>
             {% for item in tag%}
-            <a class="btn btn-secondary">{{item}}</a> <br>
+            <button disabled class="btn btn-secondary">{{item}}</button>
             {% endfor %}
         </div>
     </div>

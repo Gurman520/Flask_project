@@ -5,11 +5,13 @@
 <h3 style="text-align: center;"><strong>Начинающий проект, на котором можно легко опубликовать статью</strong></h3>
 {% if current_user.is_authenticated == False %}
 <p>Чтобы оспользоваться всеми функциями сайта, необходимо<br />войти или зарегестрироваться:</p>
-<a class="btn btn-primary " href="/register">Зарегистрироваться</a> <br>
+<a class="btn btn-primary " href="/register">Зарегистрироваться</a>
+<p>&nbsp;</p>
 <a class="btn btn-success" href="/login">Войти</a>
 {%endif%}
 {% if current_user.is_authenticated %}
-<a class="btn btn-primary " href="/create_article">Написать статью</a> <br>
+<a class="btn btn-primary " href="/create_article">Написать статью</a>
+<p>&nbsp;</p>
 <a class="btn btn-primary " href="/articles">Читать статьи</a> <br>
 {% endif %}
 

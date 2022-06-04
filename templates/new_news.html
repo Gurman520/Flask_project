@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<p>&nbsp;</p>
+<div class="col-md-12">
+    <div class="card mb-4">
+        <div class="card-body">
+            <form action="" method="post">
+                {{ form.hidden_tag() }}
+                <div class="row mb-3">
+                    <div class="col-sm-3">
+                        <h6 class="mb-0">{{ form.title.label }}</h6>
+                    </div>
+                    <div class="col-sm-9 text-secondary">
+                        {{ form.title(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-sm-3">
+                        <h6 class="mb-0">{{ form.text.label }}</h6>
+                    </div>
+                    <div class="col-sm-9 text-secondary">
+                        {{ form.text(class="form-control") }}
+                    </div>
+                </div>
+
+
+                <div class="row">
+                    {{ form.submit(type="submit", class="btn btn-primary px-4") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

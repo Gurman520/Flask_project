@@ -6,13 +6,16 @@ from forms.user_form import UserForm, UpdateUserForm
 from forms.login_form import LoginForm
 from forms.article_form import ArticleForm, EditArticleForm, AddTeg
 from forms.message_form import MessageForm
+from forms.news_form import NewsForm
 from flask_restful import Api
 import articles_resources
 import user_resources
+import news_resources
 from requests import post, get, delete, put
 import markdown
 from mail import MAIL
 import TOKEN
+import operator
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'my_secret_key'
@@ -31,7 +34,26 @@ def load_user(user_id):
 # Функция вызова главной страницы сайта
 @app.route("/")
 def index():
-    return render_template("index.html", title="Home Page")
+    lis = get('http://localhost:5000/api/v2/news').json()
+    lis.reverse()
+    return render_template("index.html", title="Home Page", news=lis)
+
+
+@app.route('/admin_panel/news', methods=['GET', 'POST'])
+@login_required
+def new_news():
+    form = NewsForm()
+    if access_level_nul():
+        if form.validate_on_submit():
+            post('http://localhost:5000/api/v2/news', json={
+                'title': form.title.data,
+                'author': current_user.id,
+                'text': form.text.data,
+            }).json()
+            return redirect('/')
+        return render_template('new_news.html', title="Новая новость", form=form)
+    else:
+        return render_template("Error.html", title="Наша ошибка", error=500)
 
 
 # Функция проверки уровня пользователя
@@ -368,6 +390,8 @@ def main():
     api.add_resource(user_resources.ListUserResource, '/api/v2/list_user')
 
     api.add_resource(articles_resources.TegResource, '/api/v2/teg')
+
+    api.add_resource(news_resources.NewsListResource, '/api/v2/news')
 
     app.run()
 

@@ -14,5 +14,16 @@
 <p>&nbsp;</p>
 <a class="btn btn-primary " href="/articles">Читать статьи</a> <br>
 {% endif %}
-
+<H2>Новости проекта: </H2>
+{% for item in news %}
+<div class="col-md-12">
+    <div class="card mb-4">
+        <div class="card-body">
+            <H2><strong>{{item['title']}}</strong></H2> <H4 style="text-align: right;">Дата публикации: {{item['data']}}</H4></br>
+            <H6>Автор: {{item['author_name']}}</H6>
+            <H3>{{item['text']}}</H3>
+        </div>
+    </div>
+</div>
+{% endfor %}
 {% endblock %}

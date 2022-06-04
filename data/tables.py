@@ -19,7 +19,6 @@ class Tag(SqlAlchemyBase):
 
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     name = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    description = sqlalchemy.Column(sqlalchemy.String)
 
 
 class Article(SqlAlchemyBase):
@@ -59,3 +58,15 @@ class User(SqlAlchemyBase, UserMixin):
 
     def check_password(self, password):
         return check_password_hash(self.hashed_password, password)
+
+
+class News(SqlAlchemyBase):
+    __tablename__ = 'news'
+
+    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
+    author = sqlalchemy.Column(sqlalchemy.Integer, ForeignKey('user.id'))
+    title = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    text = sqlalchemy.Column(sqlalchemy.String)
+    create_date = sqlalchemy.Column(sqlalchemy.DateTime,
+                                      default=datetime.datetime.now)
+    user = orm.relation('User')

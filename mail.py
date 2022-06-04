@@ -20,6 +20,17 @@ class MAIL:
         # Login Credentials for sending the mail
         self.server.login(self.msg['From'], self.password)
 
+    def call_back_mail(self, message, subject):
+        try:
+            self.msg['Subject'] = self.msg['To']
+            message = "Получено новое сообщение от пользователя Сайта\n" + subject + '\n' + message + '\n'
+            self.msg.attach(MIMEText(message, 'plain'))
+            # send the message via the server.
+            self.server.sendmail(self.msg['From'], self.msg['To'], self.msg.as_string())
+            return True
+        except Exception:
+            return False
+
     def register_mail(self):
         try:
             self.msg['Subject'] = "Уведомление"

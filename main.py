@@ -5,12 +5,14 @@ from data.tables import User, Tag, Article
 from forms.user_form import UserForm, UpdateUserForm
 from forms.login_form import LoginForm
 from forms.article_form import ArticleForm, EditArticleForm, AddTeg
+from forms.message_form import MessageForm
 from flask_restful import Api
 import articles_resources
 import user_resources
 from requests import post, get, delete, put
 import markdown
 from mail import MAIL
+import TOKEN
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'my_secret_key'
@@ -44,6 +46,16 @@ def access_level_nul():
 
 def error():
     return render_template("Error.html", title="Наша ошибка", error=500)
+
+
+@app.route('/coal_back', methods=['GET', 'POST'])
+def coal_back():
+    form = MessageForm()
+    if form.validate_on_submit():
+        m = MAIL(TOKEN.mail)
+        m.call_back_mail(form.text.data, form.subject.data)
+        return redirect('/')
+    return render_template('coal_back.html', title='Обратная связь', form=form)
 
 
 # Функция вызова страницы админ панели
@@ -171,7 +183,6 @@ def edit_article(art_id):
     if current_user.id == article['author'] or current_user.acesses_level == 0:
         form = EditArticleForm()
         if form.validate_on_submit():
-            print(form.text.data)
             f = open(article['text'], 'w')
             f.write(form.text.data)
             f.close()
@@ -260,12 +271,8 @@ def edit_profile(use_id):
         form = UpdateUserForm()
         lis = get('http://localhost:5000/api/v2/user/' + str(use_id)).json()
         if form.validate_on_submit():
-            if len(form.sex.data) == 0:  # Дополнительная проверка, что если пользователь не выбрал пол, то он устанавливает тот, что уже был
-                sex = lis['sex']
-            else:
-                sex = form.sex.data[0]
             put('http://localhost:5000/api/v2/user/' + str(use_id),
-                json={'f_name': form.f_name.data, 's_name': form.s_name.data, 'sex': sex,
+                json={'f_name': form.f_name.data, 's_name': form.s_name.data, 'sex': form.sex.data,
                       'country': form.country.data, 'email': form.email.data, 'vk': form.vk.data,
                       'git': form.git.data}).json()
             return redirect("/profile/" + str(use_id))

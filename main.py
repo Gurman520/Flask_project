@@ -15,7 +15,6 @@ from requests import post, get, delete, put
 import markdown
 from mail import MAIL
 import TOKEN
-import operator
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'my_secret_key'

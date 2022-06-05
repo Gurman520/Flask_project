@@ -65,10 +65,6 @@ def access_level_nul():
     return current_user.access_level == 0
 
 
-def error():
-    return render_template("Error.html", title="Наша ошибка", error=500)
-
-
 @app.route('/coal_back', methods=['GET', 'POST'])
 def coal_back():
     form = MessageForm()
@@ -122,7 +118,7 @@ def up_article(art_id):
     if m.open_article():
         return redirect("/admin_panel")
     else:
-        error()
+        return render_template("Error.html", title="Наша ошибка", error=500)
 
 
 # Скрыть статью с сайта
@@ -135,7 +131,7 @@ def down_article(art_id):
     if m.close_article():
         return redirect("/admin_panel")
     else:
-        error()
+        return render_template("Error.html", title="Наша ошибка", error=500)
 
 
 # Заброковать статью
@@ -148,7 +144,7 @@ def lose_article(art_id):
     if m.lose_article():
         return redirect("/admin_panel")
     else:
-        error()
+        return render_template("Error.html", title="Наша ошибка", error=500)
 
 
 # Повысить пользователя до root
@@ -239,7 +235,7 @@ def new_article():
         if m.new_article():
             return redirect('/complete')
         else:
-            error()
+            return render_template("Error.html", title="Наша ошибка", error=500)
     return render_template('new.html', title='Новая статья', form=form)
 
 
@@ -334,8 +330,7 @@ def register():
         if m.register_mail():
             return redirect('/login')
         else:
-            error()
-            return f'''Ошибка'''
+            return render_template("Error.html", title="Наша ошибка", error=500)
     return render_template('register.html', title='Регистрация', form=form)
 
 
@@ -392,7 +387,7 @@ def main():
 
     api.add_resource(news_resources.NewsListResource, '/api/v2/news')
 
-    app.run()
+    app.run(port=5000, host='0.0.0.0')
 
 
 if __name__ == '__main__':

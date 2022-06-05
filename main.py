@@ -387,8 +387,12 @@ def main():
 
     api.add_resource(news_resources.NewsListResource, '/api/v2/news')
 
-    app.run(port=5000, host='0.0.0.0')
+    app.run()
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception as e:
+        print('Неожиданное завершение программы из-за ошибки:')
+        print(e)
